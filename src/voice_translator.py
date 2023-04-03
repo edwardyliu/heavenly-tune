@@ -6,6 +6,7 @@ from time import sleep
 import deepl
 import googletrans
 import keyboard
+import libretranslatepy
 import pyaudio
 import requests
 from dotenv import load_dotenv
@@ -16,6 +17,8 @@ from modules.tts import speak
 load_dotenv()
 
 USE_DEEPL = getenv('USE_DEEPL', 'False').lower() in ('true', '1', 't')
+USE_LIBRE = getenv('USE_LIBRE', 'False').lower() in ('true', '1', 't')
+LIBRE_TRANSLATE_URL = getenv('LIBRE_TRANSLATE_URL')
 DEEPL_AUTH_KEY = getenv('DEEPL_AUTH_KEY')
 TARGET_LANGUAGE = getenv('TARGET_LANGUAGE_CODE')
 MIC_ID = int(getenv('MICROPHONE_ID'))
@@ -70,6 +73,8 @@ def on_release_key(_):
 
         if USE_DEEPL:
             translated_speech = translator.translate_text(eng_speech, target_lang=TARGET_LANGUAGE)
+        elif USE_LIBRE:
+            translated_speech = translator.translate(eng_speech, source="en", target=TARGET_LANGUAGE)
         else:
             translated_speech = translator.translate(eng_speech, dest=TARGET_LANGUAGE).text
 
@@ -98,6 +103,8 @@ if __name__ == '__main__':
     # Set DeepL or Google Translator
     if USE_DEEPL:
         translator = deepl.Translator(DEEPL_AUTH_KEY)
+    elif USE_LIBRE:
+        translator = libretranslatepy.LibreTranslateAPI(LIBRE_TRANSLATE_URL)
     else:
         translator = googletrans.Translator()
 
